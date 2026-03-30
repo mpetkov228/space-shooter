@@ -16,9 +16,8 @@ h1 {
 
 .player {
     position: absolute;
-    top: 85%;
-    left: 50%;
-    transform: translate(-50%, -50%); 
+    top: 80%;
+    left: 45%;
 }
 
 .player img {
