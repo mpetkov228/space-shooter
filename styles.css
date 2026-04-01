@@ -20,12 +20,17 @@ h1 {
 }
 
 .player {
+    user-select: none;
     position: absolute;
     top: 80%;
     left: 45%;
 }
 
 .player img {
-    transform: rotate(-90deg);
-    width: 125px;
+    width: 100px;
+}
+
+.projectile {
+    position: absolute;
+    width: 10px;
 }
