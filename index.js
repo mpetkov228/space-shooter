@@ -1,28 +1,23 @@
 const gameScreen = document.getElementById("screen");
-const player = document.getElementById("player");
+const playerDiv = document.getElementById("player");
 
-window.addEventListener("keydown", (event) => {
-    const pos = player.getBoundingClientRect();
-    let top = pos.top;
-    let left = pos.left;
-    const code = event.code;
+const gameScreenRect = gameScreen.getBoundingClientRect();
+const playerDivRect = playerDiv.getBoundingClientRect();
 
-    if (code === "KeyA") left -= 10;
-    if (code === "KeyD") left += 10;
-    if (code === "KeyW") top -= 10;
-    if (code === "KeyS") top += 10;
-    
-    if (left < 0) return;
-    if (left + player.offsetWidth > gameScreen.offsetWidth) return;
-    if (top < 0) return;
-    if (top + player.clientHeight > gameScreen.offsetHeight) return;
+let x = gameScreenRect.width * 0.47;
+let y = gameScreenRect.height * 0.8;
 
-    player.style.top = `${top}px`;
-    player.style.left = `${left}px`;
+const keys = {};
+
+document.addEventListener("keydown", (event) => {
+    keys[event.code] = true;
 });
 
+document.addEventListener("keyup", (event) => {
+    keys[event.code] = false;
+});
 
-window.addEventListener("mousedown", (event) => {
+document.addEventListener("mousedown", (event) => {
     const projectile = createProjectile();
     gameScreen.appendChild(projectile);
     let start;
@@ -33,16 +28,14 @@ window.addEventListener("mousedown", (event) => {
         }
         const elapsed = timestamp - start;
 
-        const shift = Math.max(-0.5 * elapsed, -1000);
-        projectile.style.transform = `translateY(${shift}px)`;
-        if (shift > -800) {
+        const shift = Math.min(0.5 * elapsed, 800);
+        projectile.style.transform = `translateY(${-shift}px)`;
+        if (shift < 800) {
             requestAnimationFrame(moveProjectile)
         } else {
             gameScreen.removeChild(projectile);
         }
-        console.log(shift);
     }
-
 
     requestAnimationFrame(moveProjectile);
 });
@@ -58,3 +51,37 @@ function createProjectile() {
     return projectile;
 }
 
+function getDirection() {
+    let dx = 0;
+    let dy = 0;
+
+    if (keys["KeyA"] && x > 0) dx -= 1;
+    if (keys["KeyD"] && (x + playerDivRect.width * 1.1) < gameScreenRect.width ) dx += 1;
+    if (keys["KeyW"] && y > 0) dy -= 1;
+    if (keys["KeyS"] && (y + playerDivRect.height * 1.1) < gameScreenRect.height) dy += 1;
+
+    // normalize diagonal speed
+    if (dx !== 0 && dy !== 0) {
+        dx *= Math.SQRT1_2; // 1 / sqrt(2)
+        dy *= Math.SQRT1_2;
+    }
+
+    return { dx, dy };
+}
+
+function loop() {
+    const { dx, dy } = getDirection();
+    const moving = dx !== 0 || dy !== 0;
+
+    if (moving) {
+        x += dx * 5;
+        y += dy * 5;
+    }
+
+    playerDiv.style.left = x + "px";
+    playerDiv.style.top = y + "px";
+
+    requestAnimationFrame(loop);
+}
+
+loop();
