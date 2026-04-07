@@ -1,6 +1,9 @@
-import { Application, Assets, Container, Sprite, UPDATE_PRIORITY } from 'pixi.js';
+import { Application, Assets, Container, Sprite } from 'pixi.js';
+import { Enemy } from './enemy';
+import { randInRange } from './utils.js';
 
 const app = new Application();
+globalThis.__PIXI_APP__ = app;
 
 const keys = {};
 
@@ -19,13 +22,10 @@ function move(player, time) {
   if (keys["KeyS"] && player.y + player.height < app.screen.height) player.y += 2.5 * time.deltaTime;
 }
 
-async function createEnemy() {
-  const texture = await Assets.load('assets/enemy.png');
-  const enemy = new Sprite(texture);
-  enemy.cullable = true;
-  enemy.x = Math.floor(Math.random() * ((app.screen.width - enemy.width) - enemy.width) + enemy.width);
-  enemy.y = -enemy.height;
-
+function createEnemy(texture) {
+  const enemy = new Enemy(texture);
+  enemy.x = randInRange(enemy.width, app.screen.width - enemy.width);
+  enemy.y = -randInRange(enemy.height, app.screen.height);
   return enemy;
 }
 
@@ -38,11 +38,10 @@ async function createEnemy() {
 
   app.stage.addChild(container);
 
-  const enemies = [];
+  let enemies = [];
 
   // player
   const texture = await Assets.load('assets/player.png');
-
   const ship = new Sprite(texture);
   const ratio = ship.height / ship.width;
   ship.setSize(85, 85 * ratio);
@@ -53,33 +52,34 @@ async function createEnemy() {
   container.addChild(ship);
 
   // enemy
-  const texture2 = await Assets.load('assets/enemy.png');
-
-  const enemy = new Sprite(texture2);
-  enemy.cullable = true;
-
-  container.addChild(enemy);
-
-  enemy.x = app.screen.width * 0.2;
-  enemy.y = -enemy.width;
-
-
-  const enemy2 = new Sprite(texture2);
-  enemy2.cullable = true;
-
-  container.addChild(enemy2);
-
-  enemy2.x = app.screen.width * 0.8;
-  enemy2.y = -enemy2.width;
+  const enemyTexture = await Assets.load('assets/enemy.png');
+  for (let i = 0; i < 8; i++) {
+    const enemy = createEnemy(enemyTexture);
+    enemies.push(enemy);
+    container.addChild(enemy);
+  }
 
   app.ticker.add((time) => {
-    console.log(time.elapsedMS);
-    // container.addChild(await createEnemy());
-  });
+    enemies = enemies.filter(e => {
+      if (e.isAlive) {
+        return e;
+      }
+      e.destroy()
+    });
 
-  app.ticker.add((time) => {
-    [enemy, enemy2].forEach(e => e.y += 1 * time.deltaTime);
-  });
+    enemies.forEach(e => {
+      e.y += 1 * time.deltaTime;
+      if (e.y > app.screen.height + e.height) {
+        e.isAlive = false;
+      }
+    });
+
+    if (enemies.length <= 10) {
+      const enemy = createEnemy(enemyTexture);
+      enemies.push(enemy);
+      container.addChild(enemy);
+    }
+  }, );
 
   app.ticker.add((time) => {
     move(ship, time);
