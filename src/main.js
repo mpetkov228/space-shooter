@@ -1,6 +1,7 @@
 import { Application, Assets, Container, Sprite } from 'pixi.js';
 import { Enemy } from './enemy';
 import { randInRange } from './utils.js';
+import { Player } from './player.js';
 
 const app = new Application();
 globalThis.__PIXI_APP__ = app;
@@ -37,19 +38,18 @@ function createEnemy(texture) {
   const container = new Container();
 
   app.stage.addChild(container);
-
+  
   let enemies = [];
 
   // player
   const texture = await Assets.load('assets/player.png');
-  const ship = new Sprite(texture);
-  const ratio = ship.height / ship.width;
-  ship.setSize(85, 85 * ratio);
+  const player = new Player(texture, app.screen.width * 0.5, app.screen.height * 0.8);
+  player.x = app.screen.width * 0.5;
+  player.y = app.screen.height * 0.8;
+  const ratio = player.height / player.width;
+  player.setSize(85, 85 * ratio);
 
-  ship.x = app.screen.width * 0.5;
-  ship.y = app.screen.height * 0.8;
-
-  container.addChild(ship);
+  container.addChild(player);
 
   // enemy
   const enemyTexture = await Assets.load('assets/enemy.png');
@@ -60,6 +60,7 @@ function createEnemy(texture) {
   }
 
   app.ticker.add((time) => {
+    // remove enemies when dead or offscreen
     enemies = enemies.filter(e => {
       if (e.isAlive) {
         return e;
@@ -69,7 +70,12 @@ function createEnemy(texture) {
 
     enemies.forEach(e => {
       e.y += 1 * time.deltaTime;
+      // mark enemy as dead when offscreen
       if (e.y > app.screen.height + e.height) {
+        e.isAlive = false;
+      }
+      // console.log(e.intersects(player));
+      if (e.intersects(player)) {
         e.isAlive = false;
       }
     });
@@ -82,6 +88,6 @@ function createEnemy(texture) {
   }, );
 
   app.ticker.add((time) => {
-    move(ship, time);
+    move(player, time);
   });
 })();

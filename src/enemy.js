@@ -6,11 +6,10 @@ export class Enemy extends Sprite {
      * @param {number} health 
      */
 
-    constructor(texture, health) {
+    constructor(texture) {
         super(texture);
-        this.health = health;
+        this.health = 20;
         this.isAlive = true;
-        this.cullable = true;
     }
 
     takeDamage(damage) {
@@ -18,6 +17,16 @@ export class Enemy extends Sprite {
         if (this.health <= 0) {
             this.isAlive = false;
         }
+    }
+
+    intersects(obj) {
+        const tolerance = 70;
+        return (
+            this.x < obj.x + obj.width - tolerance
+            && this.x + this.width > obj.x + tolerance
+            && this.y < obj.y + obj.height - tolerance
+            && this.y + this.height  > obj.y + tolerance
+        );
     }
 
     shoot() {}
