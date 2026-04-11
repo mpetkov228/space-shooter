@@ -101,15 +101,14 @@ function createEnemy(texture) {
       if (e.y > app.screen.height + e.height) {
         e.isAlive = false;
       }
-      // console.log(e.intersects(player));
       if (e.intersects(player)) {
+        player.takeDamage(20);
         e.isAlive = false;
       }
     });
 
     if (enemies.length <= 10) {
       const i = randInRange(0, enemyTextures.length);
-      console.log(i);
       const enemy = createEnemy(enemyTextures[i]);
       enemies.push(enemy);
       container.addChild(enemy);
