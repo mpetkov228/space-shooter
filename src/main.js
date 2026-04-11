@@ -1,6 +1,6 @@
 import { Application, Assets, Container, Sprite } from 'pixi.js';
 import { Enemy } from './enemy';
-import { randInRange } from './utils.js';
+import { randInRange, ratio } from './utils.js';
 import { Player } from './player.js';
 
 const app = new Application();
@@ -27,6 +27,7 @@ function createEnemy(texture) {
   const enemy = new Enemy(texture);
   enemy.x = randInRange(enemy.width, app.screen.width - enemy.width);
   enemy.y = -randInRange(enemy.height, app.screen.height);
+  enemy.setSize(125, 125);
   return enemy;
 }
 
@@ -64,13 +65,14 @@ function createEnemy(texture) {
   const player = new Player(texture, app.screen.width * 0.5, app.screen.height * 0.8);
   player.x = app.screen.width * 0.5;
   player.y = app.screen.height * 0.8;
-  const ratio = player.height / player.width;
-  player.setSize(85, 85 * ratio);
+  player.setSize(100, 100 * ratio(player.width, player.height));
 
   container.addChild(player);
 
   // enemy
   const enemyTexture = await Assets.load('assets/enemy.png');
+  const enemyTexture2 = await Assets.load('assets/enemy2.png');
+  const enemyTextures = [enemyTexture, enemyTexture2];
   for (let i = 0; i < 8; i++) {
     const enemy = createEnemy(enemyTexture);
     enemies.push(enemy);
@@ -106,7 +108,9 @@ function createEnemy(texture) {
     });
 
     if (enemies.length <= 10) {
-      const enemy = createEnemy(enemyTexture);
+      const i = randInRange(0, enemyTextures.length);
+      console.log(i);
+      const enemy = createEnemy(enemyTextures[i]);
       enemies.push(enemy);
       container.addChild(enemy);
     }

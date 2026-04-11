@@ -10,9 +10,7 @@ export class Player extends Sprite {
         const projectile = new Projectile(projectileTexture);
         projectile.setSize(7.5, 15);
         projectile.x = this.x + 38;
-        console.log(projectile.x, this.x);
         projectile.y = this.y + 5;
-
         return projectile;
     }
 }

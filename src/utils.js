@@ -2,4 +2,8 @@ function randInRange(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
 }
 
-export { randInRange };
+function ratio(width, height) {
+  return width / height;
+}
+
+export { randInRange, ratio };
